@@ -2,26 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dimension Shift // Google Auth</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <title>Dimension Shift // Auth</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap');
 
         :root {
             --neon-blue: #00f2ff;
+            --neon-purple: #7000ff;
             --neon-pink: #ff00c1;
-            --glass: rgba(255, 255, 255, 0.03);
         }
 
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Syncopate', sans-serif; }
         
         #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
+        /* Scanning HUD effect */
         #hud-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 2; pointer-events: none;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 2px, transparent 4px);
-            opacity: 0.4;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 2px, transparent 4px);
+            opacity: 0.3;
         }
 
         #entry-trigger {
@@ -35,31 +35,36 @@
         #login-ui {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
             z-index: 15; width: 340px; padding: 50px 40px; 
-            background: var(--glass);
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.1); 
-            backdrop-filter: blur(45px) saturate(200%);
-            -webkit-backdrop-filter: blur(45px);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px);
             opacity: 0; visibility: hidden;
             transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-            text-align: center;
         }
 
         #login-ui.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        h2 { font-size: 11px; letter-spacing: 6px; color: #fff; margin-bottom: 15px; transition: 0.5s; }
-        #sub-text { font-size: 8px; color: rgba(255,255,255,0.4); letter-spacing: 3px; margin-bottom: 40px; }
+        h2 { font-size: 11px; letter-spacing: 6px; color: #fff; margin-bottom: 40px; text-align: center; opacity: 0.8; }
 
-        #google-btn-wrapper {
-            display: flex; justify-content: center;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        input {
+            width: 100%; padding: 15px 0; margin: 10px 0; background: transparent;
+            border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fff; outline: none;
+            transition: 0.4s; font-family: 'Syncopate', sans-serif; font-size: 9px; letter-spacing: 2px;
         }
 
-        #google-btn-wrapper:hover { transform: scale(1.05); filter: brightness(1.2); }
+        input:focus { border-bottom-color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
 
-        .footer-tag { margin-top: 40px; font-size: 7px; color: rgba(255,255,255,0.2); letter-spacing: 5px; }
+        button {
+            width: 100%; padding: 20px; margin-top: 30px; background: #fff; color: #000;
+            border: none; font-family: 'Syncopate', sans-serif; font-weight: 700;
+            cursor: pointer; clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            transition: 0.4s; font-size: 10px; letter-spacing: 2px;
+        }
 
-        /* Final Verification Glitch */
-        .verified { color: var(--neon-blue) !important; text-shadow: 0 0 15px var(--neon-blue); }
+        button:hover { background: var(--neon-blue); transform: scale(1.05); }
+
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.6; } 100% { opacity: 0.3; } }
     </style>
 </head>
 <body>
@@ -67,33 +72,15 @@
     <div id="hud-overlay"></div>
     
     <div id="entry-trigger" onclick="startTransition()">
-        <h1>INITIALIZE_ACCESS_</h1>
+        <h1>ENTER_VOID_</h1>
     </div>
 
     <div id="login-ui">
-        <h2 id="main-head">GATEWAY_77</h2>
-        <p id="sub-text">NEURAL_ID_VERIFICATION</p>
-        
-        <div id="google-btn-wrapper">
-            <div id="g_id_onload"
-                 data-client_id="42510236112-cqdmkq3h4bhere871gvta7j7e2sjsfgt.apps.googleusercontent.com"
-                 data-context="signin"
-                 data-ux_mode="popup"
-                 data-callback="onGoogleAuth"
-                 data-auto_prompt="false">
-            </div>
-
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-shape="pill"
-                 data-theme="outline"
-                 data-text="continue_with"
-                 data-size="large"
-                 data-logo_alignment="left">
-            </div>
-        </div>
-
-        <div class="footer-tag">VOID_ENCRYPTION_ACTIVE</div>
+        <h2>AUTHENTICATION_REQUIRED</h2>
+        <input type="text" placeholder="USER_REF" spellcheck="false">
+        <input type="password" placeholder="SIG_KEY">
+        <button>INITIALIZE_SYNC</button>
+        <div style="margin-top: 25px; text-align: center; font-size: 7px; color: rgba(255,255,255,0.3); letter-spacing: 4px;">SECURE_PROTOCOL_808</div>
     </div>
 
     <div id="canvas-container"></div>
@@ -101,28 +88,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        // --- AUTH SUCCESS CALLBACK ---
-        function onGoogleAuth(response) {
-            const head = document.getElementById('main-head');
-            const sub = document.getElementById('sub-text');
-            const btn = document.getElementById('google-btn-wrapper');
-
-            // Visual feedback of "hacking" in
-            btn.style.opacity = '0';
-            head.innerText = "LINK_ESTABLISHED";
-            head.classList.add('verified');
-            sub.innerText = "DECRYPTING_USER_DATA...";
-            
-            console.log("JWT Token Received:", response.credential);
-            
-            // Here you would redirect or send to your backend
-            setTimeout(() => {
-                sub.innerText = "ACCESS_GRANTED_WELCOME";
-                document.getElementById('canvas-container').style.filter = 'hue-rotate(180deg) brightness(0.8)';
-            }, 1500);
-        }
-
-        // --- ANIMATION ENGINE ---
         let scene, camera, renderer, particles, liquidMesh;
         let time = 0;
         let speed = 1.0;
@@ -135,22 +100,28 @@
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setPixelRatio(window.devicePixelRatio);
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // Aura Core Geometry
-            const geometry = new THREE.IcosahedronGeometry(12, 15);
-            const material = new THREE.MeshNormalMaterial({ wireframe: true, transparent: true, opacity: 0.08 });
+            // 1. Create Liquid Energy Background (Mesh with Noise)
+            const geometry = new THREE.IcosahedronGeometry(10, 64);
+            const material = new THREE.MeshNormalMaterial({
+                wireframe: true,
+                transparent: true,
+                opacity: 0.1
+            });
             liquidMesh = new THREE.Mesh(geometry, material);
             scene.add(liquidMesh);
 
-            // Void Dust
+            // 2. Dust Particles
             const pGeo = new THREE.BufferGeometry();
-            const pCount = 4000;
+            const pCount = 3000;
             const pPos = new Float32Array(pCount * 3);
-            for(let i=0; i<pCount*3; i++) { pPos[i] = (Math.random() - 0.5) * 25; }
+            for(let i=0; i<pCount*3; i++) {
+                pPos[i] = (Math.random() - 0.5) * 20;
+            }
             pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-            const pMat = new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.015, transparent: true, opacity: 0.4 });
+            const pMat = new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.02, transparent: true, opacity: 0.5 });
             particles = new THREE.Points(pGeo, pMat);
             scene.add(particles);
 
@@ -158,12 +129,17 @@
         }
 
         function animate() {
-            time += 0.004 * speed;
-            liquidMesh.rotation.x = time * 0.15;
-            liquidMesh.rotation.y = time * 0.25;
-            liquidMesh.scale.setScalar(1 + Math.sin(time) * 0.15);
-            particles.rotation.y = time * 0.05;
-            particles.position.z = Math.sin(time * 0.3) * 1.5;
+            time += 0.005 * speed;
+            
+            // Morph Liquid Background
+            liquidMesh.rotation.x = time * 0.2;
+            liquidMesh.rotation.y = time * 0.3;
+            liquidMesh.scale.setScalar(1 + Math.sin(time) * 0.1);
+
+            // Animate Particles
+            particles.rotation.y = time * 0.1;
+            particles.position.z = Math.sin(time * 0.5) * 2;
+
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
@@ -171,11 +147,14 @@
         function startTransition() {
             if(transitioning) return;
             transitioning = true;
+
             document.getElementById('entry-trigger').style.opacity = '0';
+            
+            // High Energy acceleration
             let interval = setInterval(() => {
-                speed += 0.6;
-                liquidMesh.material.opacity += 0.012;
-                if(speed > 30) {
+                speed += 0.5;
+                liquidMesh.material.opacity += 0.01;
+                if(speed > 25) {
                     clearInterval(interval);
                     revealUI();
                 }
@@ -183,13 +162,14 @@
         }
 
         function revealUI() {
-            document.getElementById('canvas-container').style.transition = 'filter 0.6s ease-out';
-            document.getElementById('canvas-container').style.filter = 'brightness(4) saturate(250%) blur(12px)';
+            document.getElementById('canvas-container').style.transition = 'filter 0.5s ease';
+            document.getElementById('canvas-container').style.filter = 'brightness(3) saturate(200%) blur(10px)';
+            
             setTimeout(() => {
-                speed = 0.4;
-                document.getElementById('canvas-container').style.filter = 'brightness(0.4) blur(6px)';
+                speed = 0.5; // Slow ambient motion
+                document.getElementById('canvas-container').style.filter = 'brightness(0.5) blur(5px)';
                 document.getElementById('login-ui').classList.add('active');
-            }, 700);
+            }, 600);
         }
 
         window.addEventListener('resize', () => {
