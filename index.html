@@ -160,41 +160,103 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        function toggleForm(type) {
-            const tabs = document.querySelectorAll('.tab');
-            const loginFields = document.getElementById('login-fields');
-            const regFields = document.getElementById('register-fields');
-            document.getElementById('error-log').innerText = "";
+        // --- UPDATED AUTHENTICATION ENGINE ---
 
-            if (type === 'login') {
-                tabs[0].classList.add('active'); tabs[1].classList.remove('active');
-                loginFields.classList.remove('hidden'); regFields.classList.add('hidden');
-            } else {
-                tabs[1].classList.add('active'); tabs[0].classList.remove('active');
-                regFields.classList.remove('hidden'); loginFields.classList.add('hidden');
-            }
-        }
+async function handleRegister() {
+    const err = document.getElementById('error-log');
+    err.style.color = "var(--neon-pink)"; // Reset color to error pink
+    
+    // 1. Capture Form Data
+    const email = document.getElementById('reg-email').value;
+    const nickname = document.getElementById('reg-nick').value;
+    const gender = document.getElementById('reg-gender').value;
+    const branch = document.getElementById('reg-branch').value;
+    const year = document.getElementById('reg-year').value;
+    const phone = document.getElementById('reg-phone').value;
+    const pass = document.getElementById('reg-pass').value;
+    const confirm = document.getElementById('reg-confirm').value;
 
-        function handleRegister() {
-            const email = document.getElementById('reg-email').value;
-            const phone = document.getElementById('reg-phone').value;
-            const pass = document.getElementById('reg-pass').value;
-            const confirm = document.getElementById('reg-confirm').value;
-            const err = document.getElementById('error-log');
+    // 2. Client-side Validation (Keep your original logic)
+    if (!email.toLowerCase().endsWith('@gvpcdpgc.edu.in')) {
+        err.innerText = "DENIED: USE COLLEGE ID"; return;
+    }
+    if (!/^[0-9]{10}$/.test(phone)) {
+        err.innerText = "ERROR: 10 DIGIT PHONE REQUIRED"; return;
+    }
+    if (pass !== confirm) {
+        err.innerText = "ERROR: KEYS MISMATCH"; return;
+    }
+    if (pass === "" || nickname === "" || branch === "") {
+        err.innerText = "ERROR: ALL FIELDS REQUIRED"; return;
+    }
 
-            if (!email.toLowerCase().endsWith('@gvpcdpgc.edu.in')) {
-                err.innerText = "DENIED: USE COLLEGE ID"; return;
-            }
-            if (!/^[0-9]{10}$/.test(phone)) {
-                err.innerText = "ERROR: 10 DIGIT PHONE REQUIRED"; return;
-            }
-            if (pass !== confirm) {
-                err.innerText = "ERROR: KEYS MISMATCH"; return;
-            }
+    // 3. Prepare Data for Backend
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('nickname', nickname);
+    formData.append('gender', gender);
+    formData.append('branch', branch);
+    formData.append('year', year);
+    formData.append('phone', phone);
+    formData.append('password', pass);
+
+    err.innerText = "UPLOADING TO NEURAL NETWORK...";
+
+    try {
+        // 4. Send to PHP
+        const response = await fetch('register.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+
+        // 5. Handle Response
+        err.innerText = data.message;
+        if (data.status === "success") {
             err.style.color = "var(--neon-blue)";
-            err.innerText = "IDENTITY VERIFIED...";
+            setTimeout(() => toggleForm('login'), 2000);
         }
+    } catch (error) {
+        err.innerText = "LINK_FAILURE: SERVER_UNREACHABLE";
+    }
+}
 
+async function handleLogin() {
+    const err = document.getElementById('error-log');
+    err.style.color = "var(--neon-pink)";
+
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+
+    if (!email || !pass) {
+        err.innerText = "ERROR: CREDENTIALS REQUIRED"; return;
+    }
+
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', pass);
+
+    err.innerText = "ESTABLISHING SECURE LINK...";
+
+    try {
+        const response = await fetch('login.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+
+        err.innerText = data.message;
+        if (data.status === "success") {
+            err.style.color = "var(--neon-blue)";
+            // Success: Wait 1.5s then redirect
+            setTimeout(() => {
+                window.location.href = 'dashboard.php';
+            }, 1500);
+        }
+    } catch (error) {
+        err.innerText = "LINK_FAILURE: AUTH_SERVER_OFFLINE";
+    }
+}
         // --- BACKGROUND ENGINE ---
         let scene, camera, renderer, particles, liquidMesh;
         let time = 0, speed = 1.0, transitioning = false;
@@ -270,3 +332,4 @@
     </script>
 </body>
 </html>
+
