@@ -60,6 +60,21 @@
 
         /* Final Verification Glitch */
         .verified { color: var(--neon-blue) !important; text-shadow: 0 0 15px var(--neon-blue); }
+        
+        .error { color: var(--neon-pink) !important; text-shadow: 0 0 15px var(--neon-pink); }
+        
+        #error-message { 
+            font-size: 8px; 
+            color: var(--neon-pink); 
+            letter-spacing: 2px; 
+            margin-bottom: 20px; 
+            min-height: 20px;
+            text-shadow: 0 0 10px var(--neon-pink);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        #error-message.show { opacity: 1; }
     </style>
 </head>
 <body>
@@ -73,6 +88,7 @@
     <div id="login-ui">
         <h2 id="main-head">GATEWAY_77</h2>
         <p id="sub-text">NEURAL_ID_VERIFICATION</p>
+        <div id="error-message"></div>
         
         <div id="google-btn-wrapper">
             <div id="g_id_onload"
@@ -101,25 +117,78 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
+        // --- DECODE JWT PAYLOAD ---
+        function decodeJWT(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                console.error("JWT Decode Error:", error);
+                return null;
+            }
+        }
+
         // --- AUTH SUCCESS CALLBACK ---
         function onGoogleAuth(response) {
             const head = document.getElementById('main-head');
             const sub = document.getElementById('sub-text');
             const btn = document.getElementById('google-btn-wrapper');
+            const errorMsg = document.getElementById('error-message');
 
-            // Visual feedback of "hacking" in
+            // Decode JWT to extract email
+            const payload = decodeJWT(response.credential);
+            
+            if (!payload || !payload.email) {
+                showError("DECRYPTION_FAILED");
+                return;
+            }
+
+            const userEmail = payload.email;
+            const validDomain = "@gvpcdpgc.edu.in";
+
+            // Validate email domain
+            if (!userEmail.endsWith(validDomain)) {
+                showError("INVALID_DOMAIN_ACCESS_DENIED");
+                return;
+            }
+
+            // Valid college email - proceed with success flow
             btn.style.opacity = '0';
             head.innerText = "LINK_ESTABLISHED";
             head.classList.add('verified');
             sub.innerText = "DECRYPTING_USER_DATA...";
+            errorMsg.classList.remove('show');
             
             console.log("JWT Token Received:", response.credential);
+            console.log("Authenticated User:", userEmail);
             
             // Here you would redirect or send to your backend
             setTimeout(() => {
                 sub.innerText = "ACCESS_GRANTED_WELCOME";
                 document.getElementById('canvas-container').style.filter = 'hue-rotate(180deg) brightness(0.8)';
             }, 1500);
+        }
+
+        // --- ERROR HANDLING ---
+        function showError(errorText) {
+            const errorMsg = document.getElementById('error-message');
+            const head = document.getElementById('main-head');
+            
+            errorMsg.innerText = errorText;
+            errorMsg.classList.add('show');
+            head.classList.add('error');
+            
+            // Reset after 3 seconds
+            setTimeout(() => {
+                errorMsg.classList.remove('show');
+                head.classList.remove('error');
+                head.innerText = "GATEWAY_77";
+                document.getElementById('google-btn-wrapper').style.opacity = '1';
+            }, 3000);
         }
 
         // --- ANIMATION ENGINE ---
