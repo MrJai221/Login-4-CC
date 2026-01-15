@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS // Dimension Shift</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Plus+Jakarta+Sans:wght@300;500&display=swap');
+
+        :root {
+            --neon-cyan: #00f2ff;
+            --neon-pink: #ff00c1;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Syncopate', 'sans-serif'; }
+
+        /* Background Canvas */
+        #portal-canvas { position: fixed; top: 0; left: 0; z-index: 1; }
+
+        /* Stage 1: The Gateway Button */
+        #gateway-trigger {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 10; text-align: center; cursor: pointer; transition: opacity 0.5s ease;
+        }
+
+        .trigger-btn {
+            background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+            padding: 20px 40px; -famfontily: 'Orbitron'; letter-spacing: 5px; font-size: 14px;
+            text-transform: uppercase; position: relative; overflow: hidden; transition: 0.3s;
+        }
+
+        .trigger-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 30px var(--neon-cyan); }
+
+        /* Stage 2: Glassmorphic Login Form */
+        #login-container {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%);
+            z-index: 5; width: 90%; max-width: 400px; padding: 40px;
+            background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
+            opacity: 0; visibility: hidden; transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #login-container.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%); }
+
+        h2 { font-family: 'Syncopate', 'sans-serif'; color: #fff; margin-bottom: 30px; font-size: 1.5rem; letter-spacing: 2px; }
+
+        input {
+            width: 100%; padding: 15px; margin: 10px 0; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: #fff;
+            box-sizing: border-box; outline: none; transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--neon-cyan); background: rgba(0, 242, 255, 0.05); }
+
+        .auth-btn {
+            width: 100%; padding: 16px; margin-top: 25px; border: none; border-radius: 12px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink));
+            color: #fff; font-weight: 700; cursor: pointer; transition: 0.3s;
+        }
+
+        .auth-btn:hover { transform: scale(1.02); filter: brightness(1.2); }
+
+        /* Ambient Scanning Light Line */
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            animation: scan 4s linear infinite; opacity: 0.3;
+        }
+
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div id="gateway-trigger" onclick="initiateWarp()">
+        <button class="trigger-btn">Initialize Shift</button>
+    </div>
+
+    <div id="login-container">
+        <div class="scan-line"></div>
+        <h2>ACCESS_NODE</h2>
+        <input type="text" placeholder="DIMENSIONAL_ID">
+        <input type="password" placeholder="SECURE_PHASE">
+        <button class="auth-btn">ENTER NEXUS</button>
+        <p style="color: #888; font-size: 11px; margin-top: 20px; text-align: center;">V3.0 // ENCRYPTED_CHANNEL</p>
+    </div>
+
+    <canvas id="portal-canvas"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        let scene, camera, renderer, stars, starGeo;
+        let warpSpeed = 0.05;
+        let isTransitioning = false;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.z = 1;
+            camera.rotation.x = Math.PI / 2;
+
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('portal-canvas'), antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Create Star Field
+            starGeo = new THREE.BufferGeometry();
+            let starCount = 6000;
+            let positions = new Float32Array(starCount * 3);
+            for (let i = 0; i < starCount; i++) {
+                positions[i * 3] = Math.random() * 600 - 300;
+                positions[i * 3 + 1] = Math.random() * 600 - 300;
+                positions[i * 3 + 2] = Math.random() * 600 - 300;
+            }
+            starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            let starMaterial = new THREE.PointsMaterial({
+                color: 0xffffff, size: 0.7, transparent: true
+            });
+            stars = new THREE.Points(starGeo, starMaterial);
+            scene.add(stars);
+
+            animate();
+        }
+
+        function animate() {
+            let positions = starGeo.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i + 2] += warpSpeed; // Move stars toward camera
+                if (positions[i + 2] > 200) positions[i + 2] = -200;
+            }
+            starGeo.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        function initiateWarp() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            // Hide trigger
+            document.getElementById('gateway-trigger').style.opacity = '0';
+
+            // Phase 1: Accelerate (Dimensional Pull)
+            let accel = setInterval(() => {
+                warpSpeed += 0.2;
+                stars.material.color.setHSL(0.5 + (warpSpeed * 0.01), 1, 0.5); // Shift to Neon Cyan/Pink
+                if (warpSpeed > 12) {
+                    clearInterval(accel);
+                    showLogin();
+                }
+            }, 30);
+        }
+
+        function showLogin() {
+            // Phase 2: The Breakthrough
+            document.getElementById('portal-canvas').style.transition = 'filter 1s';
+            document.getElementById('portal-canvas').style.filter = 'brightness(3) blur(10px)';
+            
+            setTimeout(() => {
+                // Phase 3: Arrive at Nexus
+                warpSpeed = 0.02; // Settled drift
+                document.getElementById('portal-canvas').style.filter = 'brightness(0.5) blur(2px)';
+                document.getElementById('login-container').classList.add('active');
+            }, 800);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        init();
+    </script>
+</body>
+</html>
