@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dimension Shift // Google Auth</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimension Shift // College Auth</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap');
@@ -13,7 +14,11 @@
             --glass: rgba(255, 255, 255, 0.03);
         }
 
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Syncopate', sans-serif; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background: #000; 
+            font-family: 'Syncopate', sans-serif; 
+        }
         
         #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
@@ -47,7 +52,7 @@
         #login-ui.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
         h2 { font-size: 11px; letter-spacing: 6px; color: #fff; margin-bottom: 15px; transition: 0.5s; }
-        #sub-text { font-size: 8px; color: rgba(255,255,255,0.4); letter-spacing: 3px; margin-bottom: 40px; }
+        #sub-text { font-size: 8px; color: rgba(255,255,255,0.4); letter-spacing: 3px; margin-bottom: 30px; }
 
         #google-btn-wrapper {
             display: flex; justify-content: center;
@@ -58,9 +63,8 @@
 
         .footer-tag { margin-top: 40px; font-size: 7px; color: rgba(255,255,255,0.2); letter-spacing: 5px; }
 
-        /* Final Verification Glitch */
+        /* Status States */
         .verified { color: var(--neon-blue) !important; text-shadow: 0 0 15px var(--neon-blue); }
-        
         .error { color: var(--neon-pink) !important; text-shadow: 0 0 15px var(--neon-pink); }
         
         #error-message { 
@@ -73,7 +77,6 @@
             opacity: 0;
             transition: opacity 0.5s ease;
         }
-        
         #error-message.show { opacity: 1; }
     </style>
 </head>
@@ -117,7 +120,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        // --- DECODE JWT PAYLOAD ---
+        // --- JWT & AUTH LOGIC ---
         function decodeJWT(token) {
             try {
                 const base64Url = token.split('.')[1];
@@ -127,75 +130,61 @@
                 }).join(''));
                 return JSON.parse(jsonPayload);
             } catch (error) {
-                console.error("JWT Decode Error:", error);
                 return null;
             }
         }
 
-        // --- AUTH SUCCESS CALLBACK ---
         function onGoogleAuth(response) {
             const head = document.getElementById('main-head');
             const sub = document.getElementById('sub-text');
             const btn = document.getElementById('google-btn-wrapper');
             const errorMsg = document.getElementById('error-message');
 
-            // Decode JWT to extract email
             const payload = decodeJWT(response.credential);
-            
-            if (!payload || !payload.email) {
-                showError("DECRYPTION_FAILED");
-                return;
-            }
-
-            const userEmail = payload.email;
+            const userEmail = payload ? payload.email : "";
             const validDomain = "@gvpcdpgc.edu.in";
 
-            // Validate email domain
             if (!userEmail.endsWith(validDomain)) {
                 showError("INVALID_DOMAIN_ACCESS_DENIED");
                 return;
             }
 
-            // Valid college email - proceed with success flow
+            // SUCCESS FLOW
             btn.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
             head.innerText = "LINK_ESTABLISHED";
             head.classList.add('verified');
-            sub.innerText = "DECRYPTING_USER_DATA...";
+            sub.innerText = `SYNCING_UNITS: ${payload.given_name.toUpperCase()}...`;
             errorMsg.classList.remove('show');
             
-            console.log("JWT Token Received:", response.credential);
-            console.log("Authenticated User:", userEmail);
-            
-            // Here you would redirect or send to your backend
             setTimeout(() => {
                 sub.innerText = "ACCESS_GRANTED_WELCOME";
-                document.getElementById('canvas-container').style.filter = 'hue-rotate(180deg) brightness(0.8)';
+                document.getElementById('canvas-container').style.filter = 'hue-rotate(180deg) brightness(0.8) blur(4px)';
+                // window.location.href = "YOUR_DASHBOARD_URL"; 
             }, 1500);
         }
 
-        // --- ERROR HANDLING ---
-        function showError(errorText) {
+        function showError(text) {
             const errorMsg = document.getElementById('error-message');
             const head = document.getElementById('main-head');
+            const btn = document.getElementById('google-btn-wrapper');
             
-            errorMsg.innerText = errorText;
+            errorMsg.innerText = text;
             errorMsg.classList.add('show');
             head.classList.add('error');
-            
-            // Reset after 3 seconds
+            head.innerText = "AUTH_FAILURE";
+
             setTimeout(() => {
                 errorMsg.classList.remove('show');
                 head.classList.remove('error');
                 head.innerText = "GATEWAY_77";
-                document.getElementById('google-btn-wrapper').style.opacity = '1';
+                btn.style.opacity = '1';
             }, 3000);
         }
 
-        // --- ANIMATION ENGINE ---
+        // --- BACKGROUND ENGINE ---
         let scene, camera, renderer, particles, liquidMesh;
-        let time = 0;
-        let speed = 1.0;
-        let transitioning = false;
+        let time = 0, speed = 1.0, transitioning = false;
 
         function init() {
             scene = new THREE.Scene();
@@ -207,13 +196,11 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // Aura Core Geometry
             const geometry = new THREE.IcosahedronGeometry(12, 15);
             const material = new THREE.MeshNormalMaterial({ wireframe: true, transparent: true, opacity: 0.08 });
             liquidMesh = new THREE.Mesh(geometry, material);
             scene.add(liquidMesh);
 
-            // Void Dust
             const pGeo = new THREE.BufferGeometry();
             const pCount = 4000;
             const pPos = new Float32Array(pCount * 3);
@@ -241,6 +228,7 @@
             if(transitioning) return;
             transitioning = true;
             document.getElementById('entry-trigger').style.opacity = '0';
+            document.getElementById('entry-trigger').style.pointerEvents = 'none';
             let interval = setInterval(() => {
                 speed += 0.6;
                 liquidMesh.material.opacity += 0.012;
