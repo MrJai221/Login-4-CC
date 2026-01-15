@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dimension Shift // Neural Registry</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimension Shift // Secure Terminal</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap');
 
@@ -10,7 +11,8 @@
             --neon-blue: #00f2ff;
             --neon-purple: #7000ff;
             --neon-pink: #ff00c1;
-            --glass: rgba(255, 255, 255, 0.03);
+            --glass-bg: rgba(0, 0, 0, 0.4);
+            --border-glow: rgba(0, 242, 255, 0.2);
         }
 
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Syncopate', sans-serif; }
@@ -21,7 +23,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 2; pointer-events: none;
             background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 2px, transparent 4px);
-            opacity: 0.4;
+            opacity: 0.3;
         }
 
         #entry-trigger {
@@ -29,58 +31,63 @@
             z-index: 10; color: #fff; text-align: center; cursor: pointer;
         }
 
-        #entry-trigger h1 { font-size: 10px; letter-spacing: 12px; opacity: 0.6; transition: 1s ease; }
-        #entry-trigger:hover h1 { opacity: 1; letter-spacing: 18px; color: var(--neon-blue); text-shadow: 0 0 25px var(--neon-blue); }
+        #entry-trigger h1 { font-size: 11px; letter-spacing: 15px; opacity: 0.7; transition: 1s ease; }
+        #entry-trigger:hover h1 { opacity: 1; letter-spacing: 22px; color: var(--neon-blue); text-shadow: 0 0 30px var(--neon-blue); }
 
+        /* Increased Width and Padding for Professional Look */
         #login-ui {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
-            z-index: 15; width: 380px; padding: 40px; 
-            background: var(--glass);
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            backdrop-filter: blur(45px) saturate(200%);
-            -webkit-backdrop-filter: blur(45px);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95);
+            z-index: 15; 
+            width: 480px; /* Increased from 380px */
+            padding: 60px 50px; /* Increased padding */
+            background: var(--glass-bg);
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,242,255,0.05);
+            backdrop-filter: blur(50px) saturate(220%);
+            -webkit-backdrop-filter: blur(50px);
             opacity: 0; visibility: hidden;
-            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-            max-height: 85vh;
+            transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+            max-height: 90vh;
             overflow-y: auto;
             scrollbar-width: none;
         }
 
-        #login-ui::-webkit-scrollbar { display: none; }
         #login-ui.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        .form-header { display: flex; justify-content: space-around; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .form-header { display: flex; justify-content: space-between; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .tab { 
-            padding-bottom: 10px; font-size: 8px; color: rgba(255,255,255,0.4); 
-            cursor: pointer; letter-spacing: 2px; transition: 0.3s;
+            padding-bottom: 15px; font-size: 9px; color: rgba(255,255,255,0.3); 
+            cursor: pointer; letter-spacing: 3px; transition: 0.4s; flex: 1; text-align: center;
         }
-        .tab.active { color: var(--neon-blue); border-bottom: 2px solid var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+        .tab.active { color: var(--neon-blue); border-bottom: 2px solid var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
 
-        .input-group { position: relative; margin-bottom: 15px; }
         input, select {
-            width: 100%; padding: 12px 0; background: transparent;
+            width: 100%; padding: 18px 0; margin-bottom: 15px; background: transparent;
             border: none; border-bottom: 1px solid rgba(255,255,255,0.1); 
             color: #fff; outline: none; font-family: 'Syncopate', sans-serif; 
-            font-size: 8px; letter-spacing: 2px; transition: 0.4s;
+            font-size: 10px; letter-spacing: 2px; transition: 0.4s;
             box-sizing: border-box;
         }
 
-        select option { background: #111; color: #fff; }
+        select option { background: #0a0a0a; color: #fff; }
+        input:focus, select:focus { border-bottom-color: var(--neon-blue); background: rgba(0, 242, 255, 0.02); }
 
-        input:focus { border-bottom-color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
-
-        .dual-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .dual-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
 
         button {
-            width: 100%; padding: 18px; margin-top: 20px; background: #fff; color: #000;
+            width: 100%; padding: 22px; margin-top: 30px; background: #fff; color: #000;
             border: none; font-family: 'Syncopate', sans-serif; font-weight: 700;
-            cursor: pointer; clip-path: polygon(5% 0, 100% 0, 100% 70%, 95% 100%, 0 100%, 0 30%);
-            transition: 0.4s; font-size: 9px; letter-spacing: 2px;
+            cursor: pointer; clip-path: polygon(4% 0, 100% 0, 100% 70%, 96% 100%, 0 100%, 0 30%);
+            transition: 0.4s; font-size: 10px; letter-spacing: 3px;
         }
 
-        button:hover { background: var(--neon-blue); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,242,255,0.3); }
+        button:hover { background: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,242,255,0.2); }
 
-        #error-log { font-size: 7px; color: var(--neon-pink); text-align: center; margin-top: 15px; letter-spacing: 1px; min-height: 10px; }
+        #error-log { 
+            font-size: 10px; color: var(--neon-pink); text-align: center; 
+            margin-top: 25px; letter-spacing: 2px; min-height: 12px;
+            text-transform: uppercase;
+        }
 
         .hidden { display: none; }
     </style>
@@ -88,53 +95,56 @@
 <body>
 
     <div id="hud-overlay"></div>
-    
     <div id="entry-trigger" onclick="startTransition()">
-        <h1>INITIALIZE_SESSION_</h1>
+        <h1>INITIATE_TERMINAL_</h1>
     </div>
 
     <div id="login-ui">
         <div class="form-header">
-            <div class="tab active" onclick="toggleForm('login')">LOGIN_SYNC</div>
-            <div class="tab" onclick="toggleForm('register')">NEW_REGISTRY</div>
+            <div class="tab active" onclick="toggleForm('login')">LOGIN</div>
+            <div class="tab" onclick="toggleForm('register')">REGISTER</div>
         </div>
 
         <div id="login-fields">
-            <input type="email" id="login-email" placeholder="NEURAL_ID (@gvpcdpgc.edu.in)" spellcheck="false">
-            <input type="password" id="login-pass" placeholder="SECURITY_KEY">
-            <button onclick="handleLogin()">ACCESS_SYSTEM</button>
+            <input type="email" id="login-email" placeholder="ID (@gvpcdpgc.edu.in)">
+            <input type="password" id="login-pass" placeholder="ACCESS_KEY">
+            <button onclick="handleLogin()">LINK_START</button>
         </div>
 
         <div id="register-fields" class="hidden">
-            <input type="email" id="reg-email" placeholder="INSTITUTION_MAIL (@gvpcdpgc.edu.in)" spellcheck="false">
+            <input type="email" id="reg-email" placeholder="OFFICIAL_EMAIL (@gvpcdpgc.edu.in)">
+            
             <div class="dual-row">
                 <input type="text" id="reg-nick" placeholder="NICKNAME">
                 <select id="reg-gender">
                     <option value="" disabled selected>GENDER</option>
                     <option value="M">MALE</option>
                     <option value="F">FEMALE</option>
-                    <option value="X">NON_BINARY</option>
+                    <option value="X">OTHER</option>
                 </select>
             </div>
+
             <div class="dual-row">
                 <select id="reg-branch">
                     <option value="" disabled selected>BRANCH</option>
                     <option value="CSE">CSE</option>
                     <option value="ECE">ECE</option>
+                    <option value="IT">IT</option>
                     <option value="MECH">MECH</option>
-                    <option value="CIVIL">CIVIL</option>
                 </select>
                 <select id="reg-year">
                     <option value="" disabled selected>YEAR</option>
-                    <option value="1">I</option>
-                    <option value="2">II</option>
-                    <option value="3">III</option>
-                    <option value="4">IV</option>
+                    <option value="1">1ST_YR</option>
+                    <option value="2">2ND_YR</option>
+                    <option value="3">3RD_YR</option>
+                    <option value="4">4TH_YR</option>
                 </select>
             </div>
-            <input type="tel" id="reg-phone" placeholder="COMMS_NUMBER (PHONE)">
-            <input type="password" id="reg-pass" placeholder="CREATE_KEY">
-            <input type="password" id="reg-confirm" placeholder="CONFIRM_KEY">
+
+            <input type="text" id="reg-phone" placeholder="PHONE_10_DIGIT" maxlength="10">
+            <input type="password" id="reg-pass" placeholder="CREATE_PASSPHRASE">
+            <input type="password" id="reg-confirm" placeholder="RE_ENTER_PASSPHRASE">
+            
             <button onclick="handleRegister()">CREATE_IDENTITY</button>
         </div>
 
@@ -167,36 +177,42 @@
             }
         }
 
-        function validateDomain(email) {
-            return email.toLowerCase().endsWith('@gvpcdpgc.edu.in');
-        }
-
         function handleRegister() {
             const email = document.getElementById('reg-email').value;
+            const phone = document.getElementById('reg-phone').value;
             const pass = document.getElementById('reg-pass').value;
             const confirm = document.getElementById('reg-confirm').value;
             const err = document.getElementById('error-log');
 
-            if (!validateDomain(email)) {
-                err.innerText = "ACCESS_DENIED: INVALID_INSTITUTION_DOMAIN";
-                return;
-            }
-            if (pass !== confirm) {
-                err.innerText = "CRITICAL_ERROR: KEYS_DO_NOT_MATCH";
-                return;
-            }
-            if (pass.length < 6) {
-                err.innerText = "SECURITY_LOW: KEY_TOO_SHORT";
+            // 1. Domain Check
+            if (!email.toLowerCase().endsWith('@gvpcdpgc.edu.in')) {
+                err.innerText = "ACCESS_DENIED: DOMAIN_UNRECOGNIZED";
                 return;
             }
 
-            // SUCCESS SIMULATION
+            // 2. Phone Constraint: Numbers only and exactly 10 digits
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phoneRegex.test(phone)) {
+                err.innerText = "DATA_CORRUPTION: INVALID_PHONE_SEQUENCE";
+                return;
+            }
+
+            // 3. Password Check
+            if (pass !== confirm) {
+                err.innerText = "SYNC_FAILED: KEYS_NOT_IDENTICAL";
+                return;
+            }
+
+            if (pass.length < 8) {
+                err.innerText = "SECURITY_LOW: MIN_8_CHARACTERS";
+                return;
+            }
+
             err.style.color = "var(--neon-blue)";
-            err.innerText = "IDENTITY_CREATED. REDIRECTING...";
-            setTimeout(() => { location.reload(); }, 2000);
+            err.innerText = "IDENTITY_VERIFIED. LINKING...";
         }
 
-        // --- ANIMATION ENGINE (Liquid Aura) ---
+        // --- BACKGROUND ENGINE (Three.js) ---
         let scene, camera, renderer, particles, liquidMesh;
         let time = 0, speed = 1.0, transitioning = false;
 
@@ -210,17 +226,17 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            const geometry = new THREE.IcosahedronGeometry(12, 20);
+            const geometry = new THREE.IcosahedronGeometry(12, 18);
             const material = new THREE.MeshNormalMaterial({ wireframe: true, transparent: true, opacity: 0.08 });
             liquidMesh = new THREE.Mesh(geometry, material);
             scene.add(liquidMesh);
 
             const pGeo = new THREE.BufferGeometry();
-            const pCount = 4000;
+            const pCount = 3500;
             const pPos = new Float32Array(pCount * 3);
             for(let i=0; i<pCount*3; i++) { pPos[i] = (Math.random() - 0.5) * 25; }
             pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-            const pMat = new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.015, transparent: true, opacity: 0.4 });
+            const pMat = new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.012, transparent: true, opacity: 0.4 });
             particles = new THREE.Points(pGeo, pMat);
             scene.add(particles);
 
@@ -228,11 +244,11 @@
         }
 
         function animate() {
-            time += 0.004 * speed;
-            liquidMesh.rotation.x = time * 0.15;
-            liquidMesh.rotation.y = time * 0.25;
-            liquidMesh.scale.setScalar(1 + Math.sin(time) * 0.1);
-            particles.rotation.y = time * 0.05;
+            time += 0.005 * speed;
+            liquidMesh.rotation.x = time * 0.12;
+            liquidMesh.rotation.y = time * 0.18;
+            liquidMesh.scale.setScalar(1 + Math.sin(time) * 0.08);
+            particles.rotation.y = time * 0.04;
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
@@ -242,9 +258,9 @@
             transitioning = true;
             document.getElementById('entry-trigger').style.opacity = '0';
             let interval = setInterval(() => {
-                speed += 0.6;
-                liquidMesh.material.opacity += 0.012;
-                if(speed > 30) {
+                speed += 0.8;
+                liquidMesh.material.opacity += 0.015;
+                if(speed > 35) {
                     clearInterval(interval);
                     revealUI();
                 }
@@ -252,13 +268,13 @@
         }
 
         function revealUI() {
-            document.getElementById('canvas-container').style.transition = 'filter 0.6s ease-out';
-            document.getElementById('canvas-container').style.filter = 'brightness(4) saturate(250%) blur(12px)';
+            document.getElementById('canvas-container').style.transition = 'filter 0.8s ease';
+            document.getElementById('canvas-container').style.filter = 'brightness(3) saturate(200%) blur(15px)';
             setTimeout(() => {
                 speed = 0.4;
-                document.getElementById('canvas-container').style.filter = 'brightness(0.4) blur(6px)';
+                document.getElementById('canvas-container').style.filter = 'brightness(0.3) blur(8px)';
                 document.getElementById('login-ui').classList.add('active');
-            }, 700);
+            }, 800);
         }
 
         window.addEventListener('resize', () => {
