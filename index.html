@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dimension Shift // Auth</title>
+    <title>Dimension Shift // Neural Registry</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap');
 
@@ -10,18 +10,18 @@
             --neon-blue: #00f2ff;
             --neon-purple: #7000ff;
             --neon-pink: #ff00c1;
+            --glass: rgba(255, 255, 255, 0.03);
         }
 
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Syncopate', sans-serif; }
         
         #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
-        /* Scanning HUD effect */
         #hud-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 2; pointer-events: none;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 2px, transparent 4px);
-            opacity: 0.3;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 2px, transparent 4px);
+            opacity: 0.4;
         }
 
         #entry-trigger {
@@ -34,37 +34,55 @@
 
         #login-ui {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
-            z-index: 15; width: 340px; padding: 50px 40px; 
-            background: rgba(255, 255, 255, 0.02);
+            z-index: 15; width: 380px; padding: 40px; 
+            background: var(--glass);
             border: 1px solid rgba(255, 255, 255, 0.1); 
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px);
+            backdrop-filter: blur(45px) saturate(200%);
+            -webkit-backdrop-filter: blur(45px);
             opacity: 0; visibility: hidden;
             transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 85vh;
+            overflow-y: auto;
+            scrollbar-width: none;
         }
 
+        #login-ui::-webkit-scrollbar { display: none; }
         #login-ui.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        h2 { font-size: 11px; letter-spacing: 6px; color: #fff; margin-bottom: 40px; text-align: center; opacity: 0.8; }
-
-        input {
-            width: 100%; padding: 15px 0; margin: 10px 0; background: transparent;
-            border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fff; outline: none;
-            transition: 0.4s; font-family: 'Syncopate', sans-serif; font-size: 9px; letter-spacing: 2px;
+        .form-header { display: flex; justify-content: space-around; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { 
+            padding-bottom: 10px; font-size: 8px; color: rgba(255,255,255,0.4); 
+            cursor: pointer; letter-spacing: 2px; transition: 0.3s;
         }
+        .tab.active { color: var(--neon-blue); border-bottom: 2px solid var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+
+        .input-group { position: relative; margin-bottom: 15px; }
+        input, select {
+            width: 100%; padding: 12px 0; background: transparent;
+            border: none; border-bottom: 1px solid rgba(255,255,255,0.1); 
+            color: #fff; outline: none; font-family: 'Syncopate', sans-serif; 
+            font-size: 8px; letter-spacing: 2px; transition: 0.4s;
+            box-sizing: border-box;
+        }
+
+        select option { background: #111; color: #fff; }
 
         input:focus { border-bottom-color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
 
+        .dual-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
         button {
-            width: 100%; padding: 20px; margin-top: 30px; background: #fff; color: #000;
+            width: 100%; padding: 18px; margin-top: 20px; background: #fff; color: #000;
             border: none; font-family: 'Syncopate', sans-serif; font-weight: 700;
-            cursor: pointer; clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
-            transition: 0.4s; font-size: 10px; letter-spacing: 2px;
+            cursor: pointer; clip-path: polygon(5% 0, 100% 0, 100% 70%, 95% 100%, 0 100%, 0 30%);
+            transition: 0.4s; font-size: 9px; letter-spacing: 2px;
         }
 
-        button:hover { background: var(--neon-blue); transform: scale(1.05); }
+        button:hover { background: var(--neon-blue); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,242,255,0.3); }
 
-        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.6; } 100% { opacity: 0.3; } }
+        #error-log { font-size: 7px; color: var(--neon-pink); text-align: center; margin-top: 15px; letter-spacing: 1px; min-height: 10px; }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -72,15 +90,55 @@
     <div id="hud-overlay"></div>
     
     <div id="entry-trigger" onclick="startTransition()">
-        <h1>ENTER_VOID_</h1>
+        <h1>INITIALIZE_SESSION_</h1>
     </div>
 
     <div id="login-ui">
-        <h2>AUTHENTICATION_REQUIRED</h2>
-        <input type="text" placeholder="USER_REF" spellcheck="false">
-        <input type="password" placeholder="SIG_KEY">
-        <button>INITIALIZE_SYNC</button>
-        <div style="margin-top: 25px; text-align: center; font-size: 7px; color: rgba(255,255,255,0.3); letter-spacing: 4px;">SECURE_PROTOCOL_808</div>
+        <div class="form-header">
+            <div class="tab active" onclick="toggleForm('login')">LOGIN_SYNC</div>
+            <div class="tab" onclick="toggleForm('register')">NEW_REGISTRY</div>
+        </div>
+
+        <div id="login-fields">
+            <input type="email" id="login-email" placeholder="NEURAL_ID (@gvpcdpgc.edu.in)" spellcheck="false">
+            <input type="password" id="login-pass" placeholder="SECURITY_KEY">
+            <button onclick="handleLogin()">ACCESS_SYSTEM</button>
+        </div>
+
+        <div id="register-fields" class="hidden">
+            <input type="email" id="reg-email" placeholder="INSTITUTION_MAIL (@gvpcdpgc.edu.in)" spellcheck="false">
+            <div class="dual-row">
+                <input type="text" id="reg-nick" placeholder="NICKNAME">
+                <select id="reg-gender">
+                    <option value="" disabled selected>GENDER</option>
+                    <option value="M">MALE</option>
+                    <option value="F">FEMALE</option>
+                    <option value="X">NON_BINARY</option>
+                </select>
+            </div>
+            <div class="dual-row">
+                <select id="reg-branch">
+                    <option value="" disabled selected>BRANCH</option>
+                    <option value="CSE">CSE</option>
+                    <option value="ECE">ECE</option>
+                    <option value="MECH">MECH</option>
+                    <option value="CIVIL">CIVIL</option>
+                </select>
+                <select id="reg-year">
+                    <option value="" disabled selected>YEAR</option>
+                    <option value="1">I</option>
+                    <option value="2">II</option>
+                    <option value="3">III</option>
+                    <option value="4">IV</option>
+                </select>
+            </div>
+            <input type="tel" id="reg-phone" placeholder="COMMS_NUMBER (PHONE)">
+            <input type="password" id="reg-pass" placeholder="CREATE_KEY">
+            <input type="password" id="reg-confirm" placeholder="CONFIRM_KEY">
+            <button onclick="handleRegister()">CREATE_IDENTITY</button>
+        </div>
+
+        <div id="error-log"></div>
     </div>
 
     <div id="canvas-container"></div>
@@ -88,10 +146,59 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
+        // --- FORM LOGIC ---
+        function toggleForm(type) {
+            const tabs = document.querySelectorAll('.tab');
+            const loginFields = document.getElementById('login-fields');
+            const regFields = document.getElementById('register-fields');
+            const err = document.getElementById('error-log');
+            err.innerText = "";
+
+            if (type === 'login') {
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+                loginFields.classList.remove('hidden');
+                regFields.classList.add('hidden');
+            } else {
+                tabs[1].classList.add('active');
+                tabs[0].classList.remove('active');
+                regFields.classList.remove('hidden');
+                loginFields.classList.add('hidden');
+            }
+        }
+
+        function validateDomain(email) {
+            return email.toLowerCase().endsWith('@gvpcdpgc.edu.in');
+        }
+
+        function handleRegister() {
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+            const confirm = document.getElementById('reg-confirm').value;
+            const err = document.getElementById('error-log');
+
+            if (!validateDomain(email)) {
+                err.innerText = "ACCESS_DENIED: INVALID_INSTITUTION_DOMAIN";
+                return;
+            }
+            if (pass !== confirm) {
+                err.innerText = "CRITICAL_ERROR: KEYS_DO_NOT_MATCH";
+                return;
+            }
+            if (pass.length < 6) {
+                err.innerText = "SECURITY_LOW: KEY_TOO_SHORT";
+                return;
+            }
+
+            // SUCCESS SIMULATION
+            err.style.color = "var(--neon-blue)";
+            err.innerText = "IDENTITY_CREATED. REDIRECTING...";
+            setTimeout(() => { location.reload(); }, 2000);
+        }
+
+        // --- ANIMATION ENGINE (Liquid Aura) ---
         let scene, camera, renderer, particles, liquidMesh;
-        let time = 0;
-        let speed = 1.0;
-        let transitioning = false;
+        let time = 0, speed = 1.0, transitioning = false;
 
         function init() {
             scene = new THREE.Scene();
@@ -100,28 +207,20 @@
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // 1. Create Liquid Energy Background (Mesh with Noise)
-            const geometry = new THREE.IcosahedronGeometry(10, 64);
-            const material = new THREE.MeshNormalMaterial({
-                wireframe: true,
-                transparent: true,
-                opacity: 0.1
-            });
+            const geometry = new THREE.IcosahedronGeometry(12, 20);
+            const material = new THREE.MeshNormalMaterial({ wireframe: true, transparent: true, opacity: 0.08 });
             liquidMesh = new THREE.Mesh(geometry, material);
             scene.add(liquidMesh);
 
-            // 2. Dust Particles
             const pGeo = new THREE.BufferGeometry();
-            const pCount = 3000;
+            const pCount = 4000;
             const pPos = new Float32Array(pCount * 3);
-            for(let i=0; i<pCount*3; i++) {
-                pPos[i] = (Math.random() - 0.5) * 20;
-            }
+            for(let i=0; i<pCount*3; i++) { pPos[i] = (Math.random() - 0.5) * 25; }
             pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-            const pMat = new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.02, transparent: true, opacity: 0.5 });
+            const pMat = new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.015, transparent: true, opacity: 0.4 });
             particles = new THREE.Points(pGeo, pMat);
             scene.add(particles);
 
@@ -129,17 +228,11 @@
         }
 
         function animate() {
-            time += 0.005 * speed;
-            
-            // Morph Liquid Background
-            liquidMesh.rotation.x = time * 0.2;
-            liquidMesh.rotation.y = time * 0.3;
+            time += 0.004 * speed;
+            liquidMesh.rotation.x = time * 0.15;
+            liquidMesh.rotation.y = time * 0.25;
             liquidMesh.scale.setScalar(1 + Math.sin(time) * 0.1);
-
-            // Animate Particles
-            particles.rotation.y = time * 0.1;
-            particles.position.z = Math.sin(time * 0.5) * 2;
-
+            particles.rotation.y = time * 0.05;
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
@@ -147,14 +240,11 @@
         function startTransition() {
             if(transitioning) return;
             transitioning = true;
-
             document.getElementById('entry-trigger').style.opacity = '0';
-            
-            // High Energy acceleration
             let interval = setInterval(() => {
-                speed += 0.5;
-                liquidMesh.material.opacity += 0.01;
-                if(speed > 25) {
+                speed += 0.6;
+                liquidMesh.material.opacity += 0.012;
+                if(speed > 30) {
                     clearInterval(interval);
                     revealUI();
                 }
@@ -162,14 +252,13 @@
         }
 
         function revealUI() {
-            document.getElementById('canvas-container').style.transition = 'filter 0.5s ease';
-            document.getElementById('canvas-container').style.filter = 'brightness(3) saturate(200%) blur(10px)';
-            
+            document.getElementById('canvas-container').style.transition = 'filter 0.6s ease-out';
+            document.getElementById('canvas-container').style.filter = 'brightness(4) saturate(250%) blur(12px)';
             setTimeout(() => {
-                speed = 0.5; // Slow ambient motion
-                document.getElementById('canvas-container').style.filter = 'brightness(0.5) blur(5px)';
+                speed = 0.4;
+                document.getElementById('canvas-container').style.filter = 'brightness(0.4) blur(6px)';
                 document.getElementById('login-ui').classList.add('active');
-            }, 600);
+            }, 700);
         }
 
         window.addEventListener('resize', () => {
